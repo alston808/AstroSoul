@@ -21,6 +21,7 @@ export default function NatalChartPage() {
   const [wheelData, setWheelData] = useState<ChartWheelData | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>({ state: "idle" });
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"visual" | "data">("visual");
 
   useEffect(() => {
     init();
@@ -226,35 +227,58 @@ export default function NatalChartPage() {
   return (
     <SymbolBackground symbol="galaxy-bg" opacity={0.3}>
       <div className="min-h-screen p-4 md:p-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-4xl font-display neon-text-gold">✦ Natal Chart</h1>
-          <div className="flex gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 className="text-4xl font-display neon-text-gold">✦ Natal Chart</h1>
+            {wheelData && (
+              <p className="text-lunar/50 text-sm mt-1">
+                ASC {wheelData.ascendant.sign} · {wheelData.planets.length} planets · {wheelData.aspects.length} aspects
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* View Toggle */}
+            {wheelData && (
+              <div className="flex rounded-lg bg-void border border-nebula-light overflow-hidden">
+                <button
+                  onClick={() => setViewMode("visual")}
+                  className={`px-3 py-1.5 text-xs font-medium transition-all ${
+                    viewMode === "visual" ? "bg-cyan/20 text-cyan" : "text-lunar/50 hover:text-lunar/80"
+                  }`}
+                >
+                  ✦ Chart Wheel
+                </button>
+                <button
+                  onClick={() => setViewMode("data")}
+                  className={`px-3 py-1.5 text-xs font-medium transition-all ${
+                    viewMode === "data" ? "bg-violet/20 text-violet" : "text-lunar/50 hover:text-lunar/80"
+                  }`}
+                >
+                  📊 Data
+                </button>
+              </div>
+            )}
             <Link
               href="/"
-              className="glass-card px-4 py-2 text-sm text-lunar/60 hover:text-lunar transition-colors"
+              className="glass-card px-3 py-1.5 text-xs text-lunar/60 hover:text-lunar transition-colors"
             >
               ← New Chart
             </Link>
-            {isAuthenticated && wheelData && (
+            {isAuthenticated && wheelData && saveStatus.state !== "saved" && (
               <button
                 onClick={handleSaveToSupabase}
-                disabled={saveStatus.state === "saving" || saveStatus.state === "saved"}
-                className={`glass-card px-4 py-2 text-sm transition-all duration-300 ${
-                  saveStatus.state === "saved"
-                    ? "text-emerald border-emerald/30"
-                    : saveStatus.state === "error"
+                disabled={saveStatus.state === "saving"}
+                className={`glass-card px-3 py-1.5 text-xs transition-all duration-300 ${
+                  saveStatus.state === "error"
                     ? "text-crimson"
                     : "text-electric hover:shadow-neon-cyan"
                 }`}
               >
-                {saveStatus.state === "saving"
-                  ? "Saving..."
-                  : saveStatus.state === "saved"
-                  ? "✓ Saved"
-                  : saveStatus.state === "error"
-                  ? "✗ Error"
-                  : "💾 Save to My Charts"}
+                {saveStatus.state === "saving" ? "Saving..." : saveStatus.state === "error" ? "✗ Error" : "💾 Save"}
               </button>
+            )}
+            {saveStatus.state === "saved" && (
+              <span className="text-xs text-emerald/60">✓ Saved</span>
             )}
           </div>
         </div>

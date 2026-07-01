@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/useAuthStore";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
 export default function AuthPage() {
@@ -20,14 +21,23 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
+  const [step, setStep] = useState<"auth" | "birthdata">("auth");
+
+  // Birth data fields (collected during signup for seamless onboarding)
+  const [birthDate, setBirthDate] = useState("");
+  const [birthTime, setBirthTime] = useState("12:00");
+  const [birthLat, setBirthLat] = useState("");
+  const [birthLng, setBirthLng] = useState("");
+  const [birthTz, setBirthTz] = useState("0");
+  const [calculating, setCalculating] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
+    if (isAuthenticated && !isLoading && step === "auth") {
       router.push(redirectPath);
     }
-  }, [isAuthenticated, isLoading, router, redirectPath]);
+  }, [isAuthenticated, isLoading, router, redirectPath, step]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
@@ -36,6 +46,11 @@ export default function AuthPage() {
 
     if (mode === "signup") {
       result = await signUp(email, password, name || undefined);
+      if (!result.error) {
+        setStep("birthdata");
+        setSubmitting(false);
+        return;
+      }
     } else if (mode === "login") {
       result = await signIn(email, password);
     } else if (mode === "magic") {
@@ -53,6 +68,55 @@ export default function AuthPage() {
     setSubmitting(false);
   };
 
+  const handleBirthDataSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setCalculating(true);
+
+    try {
+      const supabase = getSupabaseClient();
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) {
+        await supabase.from("profiles").upsert({
+          id: currentUser.id,
+          full_name: name || undefined,
+          birth_date: birthDate || undefined,
+          birth_time: birthTime || undefined,
+          birth_lat: parseFloat(birthLat) || undefined,
+          birth_lng: parseFloat(birthLng) || undefined,
+          birth_tz: birthTz || "0",
+        });
+      }
+
+      if (birthDate && birthLat && birthLng) {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+        const res = await fetch(`${apiUrl}/api/calculate-chart`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            date: birthDate,
+            time: birthTime,
+            latitude: parseFloat(birthLat),
+            longitude: parseFloat(birthLng),
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          sessionStorage.setItem("astroData", JSON.stringify(data));
+        }
+      }
+
+      router.push(redirectPath);
+    } catch {
+      setError("Failed to calculate chart. You can also do this later.");
+      setCalculating(false);
+    }
+  };
+
+  const handleSkipBirthData = () => {
+    router.push(redirectPath);
+  };
+
   if (isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center galaxy-bg">
@@ -64,15 +128,14 @@ export default function AuthPage() {
     );
   }
 
-  if (isAuthenticated) return null; // useEffect redirects
-
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16 galaxy-bg">
       <Link href="/" className="mb-8">
         <h1 className="text-3xl font-display neon-text-gold">✦ AstroSoul</h1>
       </Link>
 
-      <div className="glass-card p-8 w-full max-w-md space-y-6">
+      {step === "auth" ? (
+        <div className="glass-card p-8 w-full max-w-md space-y-6">
         {/* Mode Tabs */}
         <div className="flex rounded-lg bg-void border border-nebula-light overflow-hidden">
           {(["login", "signup", "magic"] as const).map((m) => (
@@ -112,7 +175,7 @@ export default function AuthPage() {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleAuthSubmit} className="space-y-4">
             {mode === "signup" && (
               <Field
                 label="Full Name"
@@ -174,7 +237,56 @@ export default function AuthPage() {
         <p className="text-center text-xs text-lunar/40">
           By continuing, you agree to our Terms and Privacy Policy.
         </p>
-      </div>
+        </div>
+      ) : (
+        /* Step 2: Birth Data Collection after Signup */
+        <div className="glass-card p-8 w-full max-w-md space-y-6">
+          <div className="text-center">
+            <h2 className="text-xl font-display text-stellar mb-1">
+              ✦ Welcome{name ? `, ${name}` : ""}!
+            </h2>
+            <p className="text-lunar/60 text-sm">
+              Enter your birth details to reveal your natal chart.
+            </p>
+          </div>
+
+          <form onSubmit={handleBirthDataSubmit} className="space-y-4">
+            <Field label="Birth Date" type="date" value={birthDate} onChange={setBirthDate} />
+            <Field label="Birth Time" type="time" value={birthTime} onChange={setBirthTime} />
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Latitude" type="text" value={birthLat} onChange={setBirthLat} placeholder="e.g. 40.7128" />
+              <Field label="Longitude" type="text" value={birthLng} onChange={setBirthLng} placeholder="e.g. -74.0060" />
+            </div>
+            <Field label="Timezone (UTC offset)" type="text" value={birthTz} onChange={setBirthTz} placeholder="-5" />
+
+            {error && (
+              <p className="text-crimson text-sm text-center bg-crimson/10 rounded-lg py-2">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={calculating || !birthDate}
+              className="w-full py-3 rounded-lg bg-violet/20 border border-violet/40 text-violet
+                         hover:bg-violet/30 hover:shadow-neon-purple transition-all duration-300
+                         disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+            >
+              {calculating ? (
+                <span className="inline-flex items-center gap-2"><Spinner /> Calculating...</span>
+              ) : (
+                "✦ Reveal My Chart ✦"
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSkipBirthData}
+              className="w-full text-xs text-lunar/40 hover:text-lunar/60 underline transition-colors"
+            >
+              Skip for now — I&apos;ll enter it later
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Navigation Tabs — links to different modes */}
       <nav className="mt-8 flex gap-4 flex-wrap justify-center">

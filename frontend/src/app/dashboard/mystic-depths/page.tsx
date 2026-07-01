@@ -45,6 +45,20 @@ export default function MysticDepthsPage() {
             setLoading(false);
             return;
           }
+
+          // If no reading, try loading chart data from Supabase
+          const { data: charts } = await supabase
+            .from("birth_charts")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+          if (charts && charts.length > 0) {
+            setChartData({ meta: charts[0] });
+            setLoading(false);
+            return;
+          }
         } catch (err) {
           console.error("Failed to load mystic reading:", err);
         }

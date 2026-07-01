@@ -61,9 +61,9 @@ cp .env.example .env
 ### Environment Variables
 
 ```env
-# Supabase
+# Supabase (New API Key format)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your-key-here
 
 # Backend
 PORT=3001

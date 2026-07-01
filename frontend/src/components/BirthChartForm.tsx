@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from "react";
 import { useAuthStore } from "@/lib/stores/useAuthStore";
+import { useChartStore } from "@/lib/stores/useChartStore";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
