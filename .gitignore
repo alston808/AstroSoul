@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Python
+data-pipeline/.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Build output
+frontend/.next/
+frontend/out/
+backend/dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Supabase
+supabase/.env
+supabase/.temp
+
+# SSH Keys (never commit!)
+github
+github.pub
+*.pem
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Bun
+bun.lockb
+
+# Images (generated)
+frontend/public/images/symbols/*.webp
+!frontend/public/images/symbols/.gitkeep
+alston.json
+github
+github.pub
+alston.json
+github
+github.pub
+data-pipeline/sources/

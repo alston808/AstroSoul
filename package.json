@@ -1,0 +1,21 @@
+{
+  "name": "astrosoul",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AstroSoul - Hyper-personalized astrology insights",
+  "scripts": {
+    "dev:frontend": "cd frontend && bun run dev",
+    "dev:backend": "cd backend && bun run dev",
+    "dev": "bun run dev:backend & bun run dev:frontend",
+    "build:frontend": "cd frontend && bun run build",
+    "build:backend": "cd backend && bun run build",
+    "build": "bun run build:backend && bun run build:frontend",
+    "install:all": "cd frontend && bun install && cd ../backend && bun install && cd ../data-pipeline && python3 -m pip install -r requirements.txt",
+    "generate:images": "cd frontend && bun run ../data-pipeline/generate-images.ts",
+    "lint": "cd frontend && bun run lint"
+  },
+  "dependencies": {
+    "puppeteer": "^25.2.1",
+    "sharp": "^0.35.2"
+  }
+}

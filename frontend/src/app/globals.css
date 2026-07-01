@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Void & Nebula (Backgrounds) ── */
+  --color-void: #0a0a1a;
+  --color-void-deep: #050510;
+  --color-nebula: #1a0a2e;
+  --color-nebula-light: #2a1a4e;
+
+  /* ── Celestial Neon Palette ── */
+  --color-stellar: #ffd700;   /* Gold – Sun, Leo */
+  --color-lunar: #c0c0ff;     /* Silver – Moon, Cancer */
+  --color-crimson: #ff2d2d;   /* Red – Aries, Mars */
+  --color-electric: #00bfff;  /* Cyan-Blue – Aquarius, Uranus */
+  --color-violet: #8b00ff;    /* Purple – Pisces, Neptune */
+  --color-magenta: #ff00ff;   /* Hot Pink – Scorpio, Pluto */
+  --color-emerald: #00ff88;   /* Green – Taurus, Venus-earth */
+  --color-neonCyan: #00e5ff;  /* Cyan – Gemini, Mercury */
+  --color-roseGold: #ff69b4;  /* Pink – Libra */
+  --color-amber: #ffb347;     /* Orange-Amber – Sagittarius */
+
+  /* ── Zodiac Sign Colors ── */
+  --color-aries: #ff2d2d;
+  --color-taurus: #00ff88;
+  --color-gemini: #00e5ff;
+  --color-cancer: #c0c0ff;
+  --color-leo: #ffd700;
+  --color-virgo: #98ff98;
+  --color-libra: #ff69b4;
+  --color-scorpio: #ff00ff;
+  --color-sagittarius: #ffb347;
+  --color-capricorn: #404040;
+  --color-aquarius: #00bfff;
+  --color-pisces: #8b00ff;
+
+  /* ── Glow Utilities ── */
+  --shadow-neon-gold: 0 0 20px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.15);
+  --shadow-neon-purple: 0 0 20px rgba(139, 0, 255, 0.4), 0 0 60px rgba(139, 0, 255, 0.15);
+  --shadow-neon-cyan: 0 0 20px rgba(0, 229, 255, 0.4), 0 0 60px rgba(0, 229, 255, 0.15);
+  --shadow-neon-magenta: 0 0 20px rgba(255, 0, 255, 0.4), 0 0 60px rgba(255, 0, 255, 0.15);
+
+  /* ── Fonts ── */
+  --font-sans: "Inter", "SF Pro Display", system-ui, sans-serif;
+  --font-display: "Cinzel", "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* ── Animations ── */
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-star-twinkle: star-twinkle 2s ease-in-out infinite;
+  --animate-float: float 6s ease-in-out infinite;
+}
+
+/* ── Base Styles ── */
+body {
+  background-color: var(--color-void);
+  color: #e0e0e0;
+  font-family: var(--font-sans);
+}
+
+/* ── Animations ── */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ── Neon Text Utility ── */
+.neon-text-gold {
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.3);
+}
+.neon-text-cyan {
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.6), 0 0 30px rgba(0, 229, 255, 0.3);
+}
+.neon-text-magenta {
+  text-shadow: 0 0 10px rgba(255, 0, 255, 0.6), 0 0 30px rgba(255, 0, 255, 0.3);
+}
+.neon-text-purple {
+  text-shadow: 0 0 10px rgba(139, 0, 255, 0.6), 0 0 30px rgba(139, 0, 255, 0.3);
+}
+
+/* ── Galaxy Background Gradient ── */
+.galaxy-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(139, 0, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0, 191, 255, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(255, 0, 255, 0.05) 0%, transparent 50%),
+    var(--color-void);
+}
+
+/* ── Glass Card ── */
+.glass-card {
+  background: rgba(26, 10, 46, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 0, 255, 0.15);
+  border-radius: 16px;
+}
